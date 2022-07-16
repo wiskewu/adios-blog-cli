@@ -43,6 +43,8 @@ export const PAGE_TPL_NAME = {
     extra: 'extra',
 };
 
+// ip tester
 export const IP_REG = /(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}/;
 
-export const SLASH_REG = /(?<!:)(\/\/)/g;
+// remove redundant slash symbol
+export const SLASH_REG = /(?<!:)(\/\/+)/g;
