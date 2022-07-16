@@ -17,6 +17,8 @@ import hljs, { Language } from 'highlight.js';
 import { parse } from 'node-html-parser';
 import slugify from 'slugify';
 
+import { resolveWebUrl } from '../utils/file';
+import { log, error, warn } from '../utils/logger';
 import { type MarkdownDescriptor } from '../interface';
 
 /**
@@ -53,7 +55,7 @@ const md: MarkdownIt = new MarkdownIt({
             try {
                 return `<pre class="language-${lang}" data-lang="${language.name}"><code>${hljs.highlight(lang, str, true).value}</code></pre>`
             } catch(_) {
-                console.error('\n##########ERRORS:', _);
+                error('\n##########ERRORS:', _);
             }
         }
         return `<pre data-lang="Code"><code>${md.utils.escapeHtml(str)}</code></pre>`
@@ -70,30 +72,31 @@ md.use(MarkdownItSub)
     .use(MarkdownItAnchor, { slugify: anchorSlugify })
     .use(MarkdownItTocRightDone);
 
-/**
- * 创建代码块
- * @param originCodeBlockHtml 
- * @param className 
- * @param language 
- * @returns 
- */
- const createCodeBlock = (originCodeBlockHtml: string, className: string, language?: string) => {
-    const lang = language || 'Code';
-    return `<figure class="hljs ${className}" data-lang="${lang}"><table><tbody>
-                <tr>
-                    <td class="hljs-code">
-                        ${originCodeBlockHtml}
-                    </td>
-                </tr>
-            </tbody></table></figure>`;
-};
+// /**
+//  * 创建代码块
+//  * @param originCodeBlockHtml 
+//  * @param className 
+//  * @param language 
+//  * @returns 
+//  */
+//  const createCodeBlock = (originCodeBlockHtml: string, className: string, language?: string) => {
+//     const lang = language || 'Code';
+//     return `<figure class="hljs ${className}" data-lang="${lang}"><table><tbody>
+//                 <tr>
+//                     <td class="hljs-code">
+//                         ${originCodeBlockHtml}
+//                     </td>
+//                 </tr>
+//             </tbody></table></figure>`;
+// };
 
 /**
  * 根据html生成对应的目录标记（弥补markdown-it-anchor 不解析纯html文本的问题）
  * @param html 
+ * @param parsedPublicPath 公共路径
  * @returns 
  */
-const processingRawMdHtml = (html: string): { html: string; toc: string } => {
+const processingRawMdHtml = (html: string, parsedPublicPath: string): { html: string; toc: string } => {
     const root = parse(html);
     const timeMs = Date.now();
     let titleCnt = 1;
@@ -110,17 +113,23 @@ const processingRawMdHtml = (html: string): { html: string; toc: string } => {
     }
 
     // 额外封装代码块
-    for (const c of root.querySelectorAll('pre')) {
-        const codeBlock = c.outerHTML; // 取出"<pre><code></code></pre>"部分
-        const className = c.classNames;
-        const lang = c.getAttribute('data-lang');
-        // 直接替换原pre标签
-        c.replaceWith(createCodeBlock(codeBlock, className, lang));
-    }
-    // TODO：替换所有图片的相对路径链接到绝对路径地址
+    // for (const c of root.querySelectorAll('pre')) {
+    //     const codeBlock = c.outerHTML; // 取出"<pre><code></code></pre>"部分
+    //     const className = c.classNames;
+    //     const lang = c.getAttribute('data-lang');
+    //     // 直接替换原pre标签
+    //     c.replaceWith(createCodeBlock(codeBlock, className, lang));
+    // }
 
+    // 替换所有图片的相对路径链接到绝对路径地址
+    for (const img of root.querySelectorAll('img')) {
+        const src = img.getAttribute('src');
+        const wrappedSrc = resolveWebUrl(parsedPublicPath, src);
+        img.setAttribute('src', wrappedSrc);
+    }
+
+    // 删除toc（类名由markdown-it-toc-done-right插件生成）
     let lastToc = '';
-    // TODO: 删除toc（类名由markdown-it-toc-done-right插件生成）
     for (const t of root.querySelectorAll('.table-of-contents')) {
         lastToc = t.outerHTML;
         t.remove();
@@ -136,10 +145,10 @@ const processingRawMdHtml = (html: string): { html: string; toc: string } => {
  * @param mdContent 
  * @returns 
  */
- export const renderMdToHtml = (mdContent: string) => {
+ export const renderMdToHtml = (mdContent: string, parsedPublicPath: string) => {
     // 渲染时默认加上TOC(markdown语法)以自动生成目录结构，渲染完毕存储后需移除该目录节点
     mdContent += '\n[TOC]';
-    return processingRawMdHtml(md.render(mdContent));
+    return processingRawMdHtml(md.render(mdContent), parsedPublicPath);
 };
 
 /**
@@ -148,23 +157,23 @@ const processingRawMdHtml = (html: string): { html: string; toc: string } => {
  * @param filePath 文件路径
  * @returns 
  */
-export const parseMdToDescriptor = (rawMarkdown: string, filePath: string): MarkdownDescriptor | null => {
+export const parseMdToDescriptor = (rawMarkdown: string, filePath: string, parsedPublicPath: string): MarkdownDescriptor | null => {
     const seperator = '---\n';
     const sepLen = seperator.length;
     const startIdx = rawMarkdown.indexOf(seperator);
     if (startIdx === -1) {
-        console.error(`can not parse file information of start position:【${filePath}】, please check it out.`);
+        error(`can not parse file information of start position:【${filePath}】, please check it out\n.`);
         return null;
     }
     const endIdx = rawMarkdown.indexOf(seperator, startIdx + sepLen);
     if (endIdx === -1) {
-        console.error(`can not parse file information of end position:【${filePath}】, please check it out.`);
+        error(`can not parse file information of end position:【${filePath}】, please check it out\n.`);
         return null;
     }
     const infoStr = rawMarkdown.slice(startIdx + sepLen, endIdx).trim();
     const contentStr = rawMarkdown.slice(endIdx + sepLen).trim();
     if (!contentStr.length) {
-        console.error(`content is empty, file: 【${filePath}】`);
+        error(`content is empty, file: 【${filePath}】\n`);
         return null;
     }
     const infos = infoStr.split('\n');
@@ -199,19 +208,19 @@ export const parseMdToDescriptor = (rawMarkdown: string, filePath: string): Mark
                 result[name] = value.toLocaleLowerCase() === 'true';
                 break;
             default:
-                console.warn(`can not parse field '${key}' with '${value}' in ${filePath}`);
+                warn(`can not parse field '${key}' with '${value}' in ${filePath}`);
         }
     }, infos);
 
-    const { html, toc } = renderMdToHtml(contentStr);
+    const { html, toc } = renderMdToHtml(contentStr, parsedPublicPath);
     result.html = html;
     result.toc = toc;
     result.mdContent = contentStr;
     return result;
 }
 
-export const parseMdWithSimpleDescriptor = (rawMarkdown: string, filename: string): MarkdownDescriptor => {
-    const { html, toc } = renderMdToHtml(rawMarkdown);
+export const parseMdWithSimpleDescriptor = (rawMarkdown: string, filename: string, parsedPublicPath: string): MarkdownDescriptor => {
+    const { html, toc } = renderMdToHtml(rawMarkdown, parsedPublicPath);
     const result: MarkdownDescriptor = {
         title: filename,
         layout: '',

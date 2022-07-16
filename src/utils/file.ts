@@ -14,7 +14,7 @@ export const resolvePublicPath = (publicPath: string) => {
         return publicPath;
     }
     // domin or ip（去除冗余'/'）
-    return publicPath.replace(/^\//, '').replace(/\/$/, '');
+    return publicPath.replace(SLASH_REG, '/');
 };
 
 /**
@@ -130,7 +130,7 @@ export const getFileListedUrl = (directories: string[], outputPublicPath: string
  */
 export const resolveResourceUrl = (parsedPublicPath: string, url: string) => {
     // 去除冗余'/'
-    return (parsedPublicPath + url).replace(SLASH_REG, '/');
+    return [parsedPublicPath, url].join('/').replace(SLASH_REG, '/');
 }
 
 /**
@@ -143,5 +143,5 @@ export const resolveWebUrl = (parsedPublicPath: string, pathname: string) => {
     if (pathname.startsWith('http') || IP_REG.test(pathname)) {
         return pathname;
     }
-    return (parsedPublicPath + pathname).replace(SLASH_REG, '/');
+    return [parsedPublicPath, pathname].join('/').replace(SLASH_REG, '/');
 };

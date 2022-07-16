@@ -12,6 +12,7 @@ import {
     type IRenderPageWithTplProps,
     type PostLike,
 } from './render';
+import { error } from '../utils/logger';
 import type { Config, PugLocalData, ArchivePostItem } from "../interface";
 import {
     SOURCE_DIR_ABOUT,
@@ -126,7 +127,7 @@ export const renderAboutPage = (options: {
     const { outDir, sourceDir, config, layoutDir, localData, publicPath } = options;
     const aboutPath = resolve(sourceDir, SOURCE_DIR_ABOUT, 'about.md');
     const aboutMd = fse.readFileSync(aboutPath).toString();
-    const aboutDescriptor = parseMdWithSimpleDescriptor(aboutMd, 'about');
+    const aboutDescriptor = parseMdWithSimpleDescriptor(aboutMd, 'about', publicPath);
     if (aboutDescriptor) {
         const aboutPost: PostLike = {
             url: getRouteIndexedUrl([DST_PAGE_ABOUT], publicPath),
@@ -161,19 +162,19 @@ export const renderExtraPages = (options: {
     const { extraPages = [] } = config.settings;
     R.forEach((item) => {
         if (!item.layout) {
-            console.error('Please specify an layout on independent page with: ', item);
+            error('Please specify an layout on independent page with: ', item);
             return;
         }
         if (item.source) {
             // with md data
             if (item.source.indexOf('/') > -1) {
-                console.error('Please specify an valid source name on rendering independent page with: ', item);
+                error('Please specify an valid source name on rendering independent page with: ', item);
                 return;
             }
             const htmlFileNameNonExt = item.outputName || item.source;
             const pagePath = resolve(extraDir, `${item.source}.md`);
             const pageMd = fse.readFileSync(pagePath).toString();
-            const pageDescriptor = parseMdWithSimpleDescriptor(pageMd, item.source);
+            const pageDescriptor = parseMdWithSimpleDescriptor(pageMd, item.source, publicPath);
             if (pageDescriptor) {
                 const pagePost: PostLike = {
                     url: getUrl([DST_PAGE_EXTRA], publicPath, htmlFileNameNonExt),

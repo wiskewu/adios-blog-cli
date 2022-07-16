@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import R from 'ramda';
 import { resolve } from 'path';
 import rd from 'rd';
-import { log } from '../utils/logger';
+import { log, warn } from '../utils/logger';
 import { parseMdToDescriptor } from '../utils/markdown';
 import { resolvePublicPath, getUrl, getFilePath, resolveFilenameWithoutExt, resolveResourceUrl, resolveWebUrl } from '../utils/file';
 import { getPugCategoriesData, getPugTagsData, getPugNavListData } from '../utils/pug';
@@ -51,9 +51,9 @@ export default function build(absProjectPath: string) {
     const srcPostsDir = resolve(sourceDir, SOURCE_DIR_POSTS);
     rd.eachFileFilterSync(srcPostsDir, /\.md$/, (f) => {
         const mdFile = fse.readFileSync(f).toString();
-        const mdDescriptor = parseMdToDescriptor(mdFile, f);
+        const mdDescriptor = parseMdToDescriptor(mdFile, f, publicPath);
         if (!mdDescriptor || mdDescriptor.draft === true) {
-            console.warn('Draft not compiled: ', f);
+            warn('[DRAFT] Draft not compiled: ', f);
             return;
         }
         const filename = resolveFilenameWithoutExt(srcPostsDir, f);
@@ -66,7 +66,7 @@ export default function build(absProjectPath: string) {
         // 首页文章过滤
         const filterCategories = R.difference(mdDescriptor.categories, config.settings.homepage?.filter || []);
         if (filterCategories.length !== mdDescriptor.categories.length) {
-            console.warn('Post not compiled by filter: ', f);
+            warn('[FILTER] Post not compiled into Index page by filter: ', f);
         } else {
             homePostList.push(post);
         }

@@ -16,7 +16,7 @@ export default async function init() {
     ];
     const answer = await prompt(question);
     const dst = path.resolve(`./${answer.name}`);
-    const repo = 'git@github.com:wiskewu/eslint-config-basejs.git';
+    const repo = 'git@github.com:wiskewu/adios-blog-template.git';
     const progress = ora(`Downloading ${repo} into ${dst}...`);
     progress.start();
     gitPullOrClone(repo, dst, (err) => {
