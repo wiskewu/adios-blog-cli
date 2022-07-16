@@ -1,0 +1,44 @@
+#! /usr/bin/env node
+const clear = require('clear');
+const { prompt } = require('inquirer');
+const pkg = require('../package.json');
+const { log } = require('../lib/utils/logger');
+const init = require('../lib/cli/init').default;
+
+function prepare() {
+    clear();
+
+    log(`Current Cli version: ${pkg.version}`);
+}
+
+// TODO: more options in the future
+const choices = [
+    {
+        name: "从模版中初始化项目(Init project from remote template)",
+        value: "init"
+    },
+    {
+        name: "退出(Exit)",
+        value: "exit"
+    }
+];
+const question = [
+    {
+        type: "rawlist",
+        message: "请选择要执行的操作(Please select an operation below)?",
+        name: "operation",
+        choices: choices,
+    }
+];
+async function run() {
+    prepare();
+    const answer = await prompt(question);
+    if (answer.operation === 'init') {
+        await init();
+    } else {
+        log('Exit, byebye.');
+        return;
+    }
+}
+
+run();
