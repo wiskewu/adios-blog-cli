@@ -65,8 +65,7 @@ export const getPugLayoutFilepath = (layoutDir: string, layoutshortname: string)
  */
 export const getUrl = (routes: string[], parsedPublicPath: string, filename: string) => {
     const rs = routes.concat('');
-    const pb = parsedPublicPath === '/' ? '' : parsedPublicPath;
-    return [pb, ...rs].join('/') + filename + '.html';
+    return ([parsedPublicPath, ...rs].join('/')).replace(SLASH_REG, '/') + filename + '.html';
 };
 
 /**

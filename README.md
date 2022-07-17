@@ -6,7 +6,7 @@ Simple, Neat, Markdown First.
 ### Usage
 On terminal:
 ```bash
-yarn install adios-blog-cli -g
+yarn global add adios-blog-cli
 
 adios
 ```
