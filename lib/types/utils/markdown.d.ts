@@ -4,7 +4,7 @@ import { type MarkdownDescriptor } from '../interface';
  * @param mdContent
  * @returns
  */
-export declare const renderMdToHtml: (mdContent: string) => {
+export declare const renderMdToHtml: (mdContent: string, parsedPublicPath: string) => {
     html: string;
     toc: string;
 };
@@ -14,5 +14,5 @@ export declare const renderMdToHtml: (mdContent: string) => {
  * @param filePath 文件路径
  * @returns
  */
-export declare const parseMdToDescriptor: (rawMarkdown: string, filePath: string) => MarkdownDescriptor | null;
-export declare const parseMdWithSimpleDescriptor: (rawMarkdown: string, filename: string) => MarkdownDescriptor;
+export declare const parseMdToDescriptor: (rawMarkdown: string, filePath: string, parsedPublicPath: string) => MarkdownDescriptor | null;
+export declare const parseMdWithSimpleDescriptor: (rawMarkdown: string, filename: string, parsedPublicPath: string) => MarkdownDescriptor;
