@@ -79,7 +79,7 @@ export default function build(absProjectPath: string) {
         // 首页文章过滤
         const filterCategories = R.difference(mdDescriptor.categories, config.settings.homepage?.filter || []);
         if (filterCategories.length !== mdDescriptor.categories.length) {
-            warn('[FILTER] Post not compiled into Index page by filter: ', f);
+            warn(`[FILTER] Post not compiled into Index page by filter [${config.settings.homepage?.filter}]: `, f);
         } else {
             homePostList.push(post);
         }

@@ -11,7 +11,7 @@ export const sortUnderWeightAndDate = (posts: Post[], latestFirst: boolean = tru
     const unWeightedPosts: Post[] = [];
     // 优先考虑更新时间 
     const getDate = (createAt: Dayjs, updateAt: Dayjs) => {
-        return updateAt.isValid() ? updateAt : createAt.isValid() ? createAt : new Dayjs();
+        return updateAt?.isValid() ? updateAt : createAt?.isValid() ? createAt : new Dayjs();
     };
 
     R.forEach((post) => {

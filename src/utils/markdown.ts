@@ -178,7 +178,15 @@ export const parseMdToDescriptor = (rawMarkdown: string, filePath: string, parse
         return null;
     }
     const infos = infoStr.split('\n');
-    const result: MarkdownDescriptor = {} as MarkdownDescriptor;
+    const result: MarkdownDescriptor = {
+        // default values
+        tags: [],
+        categories: [],
+        draft: false,
+        top: false,
+        updateDate: null,
+        createDate: null,
+    } as MarkdownDescriptor;
     R.forEach((info) => {
         // assume that all key and value is valid.
         const [k, ...rest] = info.split(':');

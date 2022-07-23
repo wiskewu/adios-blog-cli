@@ -29,17 +29,13 @@ export const blogInfoValidate = (info: MarkdownDescriptor, filePath: string) => 
     }
     if (warns.length) {
         warn(`\nPlease fix those warnings in 【${filePath}】, to make your post more completed:`);
-        R.forEach(msg => {
-            // we do not need any highlight color
-            console.log(`${msg}\n`);
-        }, warns);
+        // we do not need any highlight color
+        R.forEach(console.log, warns);
     }
     if (errs.length) {
         error(`\nPlease fix those errors in 【${filePath}】, otherwise this post will not be published:`);
-        R.forEach(msg => {
-            // we do not need any highlight color
-            console.log(`${msg}\n`);
-        }, errs);
+        // we do not need any highlight color
+        R.forEach(console.log, errs);
         return false;
     }
     return true;
