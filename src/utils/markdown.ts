@@ -19,6 +19,7 @@ import slugify from 'slugify';
 
 import { resolveWebUrl } from '../utils/file';
 import { log, error, warn } from '../utils/logger';
+import { blogInfoValidate } from './checker';
 import { type MarkdownDescriptor } from '../interface';
 
 /**
@@ -212,6 +213,9 @@ export const parseMdToDescriptor = (rawMarkdown: string, filePath: string, parse
         }
     }, infos);
 
+    if (!blogInfoValidate(result, filePath)) {
+        return null;
+    }
     const { html, toc } = renderMdToHtml(contentStr, parsedPublicPath);
     result.html = html;
     result.toc = toc;

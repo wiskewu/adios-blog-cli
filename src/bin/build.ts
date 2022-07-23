@@ -61,7 +61,11 @@ export default function build(absProjectPath: string) {
     rd.eachFileFilterSync(srcPostsDir, /\.md$/, (f) => {
         const mdFile = fse.readFileSync(f).toString();
         const mdDescriptor = parseMdToDescriptor(mdFile, f, publicPath);
-        if (!mdDescriptor || mdDescriptor.draft === true) {
+        if (!mdDescriptor) {
+            error('[FAILED] post compile failed: ', f);
+            return;
+        }
+        if (mdDescriptor.draft === true) {
             warn('[DRAFT] Draft not compiled: ', f);
             return;
         }
@@ -204,5 +208,5 @@ export default function build(absProjectPath: string) {
     // 复制md源数据中使用的资源assets文件夹到public
     fse.copySync(userResourceDir, resolve(outputDir, DST_DIR_ASSETS));
 
-    log('构建成功，快去部署或预览吧！');
+    log('构建结束，快去部署或预览吧！');
 }
