@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import R from 'ramda';
 import { resolve } from 'path';
 import rd from 'rd';
-import { log, warn } from '../utils/logger';
+import { error, log, warn } from '../utils/logger';
 import { parseMdToDescriptor } from '../utils/markdown';
 import { resolvePublicPath, getUrl, getFilePath, resolveFilenameWithoutExt, resolveResourceUrl, resolveWebUrl } from '../utils/file';
 import { getPugCategoriesData, getPugTagsData, getPugNavListData } from '../utils/pug';
@@ -28,7 +28,16 @@ export default function build(absProjectPath: string) {
     // 配置文件
     const config: Config = JSON.parse(configFile);
     // 主题文件目录
-    const themeDir = resolve(rootDir, config.theme.path);
+    let themeDir = '';
+    if (config.theme.pkg) {
+        themeDir = require(config.theme.pkg)();
+    } else if (config.theme.path) {
+        themeDir = resolve(rootDir, config.theme.path);
+    }
+    if (!themeDir) {
+        error(`Please specify a theme directory or package name but got: ${config.theme}`);
+        return;
+    }
     // 数据源 数据源引用资源 输出目录
     const sourceDir = resolve(rootDir, config.alias?.source || SOURCE_ROOT);
     // md源文件中引用的资源数据

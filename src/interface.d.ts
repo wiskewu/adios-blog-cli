@@ -55,8 +55,10 @@ export interface Config {
     siteinfo: SiteinfoConfig;
     settings: SettingsConfig;
     theme: {
-        name: string;
-        path: string;
+        // the path of the theme
+        path?: string;
+        // the package name of the theme (consider this first)
+        pkg?: string;
     },
     // has default
     alias?: {
