@@ -8,24 +8,29 @@
     "url": "https://github.com/wiskewu/adios-blog-cli.git"
   },
   "author": {
-		"name": "wiskewu",
-		"email": "wiskewu@gmail.com",
-		"url": "https://github.com/wiskewu"
-	},
+    "name": "wiskewu",
+    "email": "wiskewu@gmail.com",
+    "url": "https://github.com/wiskewu"
+  },
   "bugs": {
     "url": "https://github.com/wiskewu/adios-blog-cli/issues"
   },
   "files": [
-		"lib",
-		"bin"
-	],
+    "lib",
+    "bin"
+  ],
   "bin": {
     "adios": "bin/adios"
   },
   "scripts": {
     "build": "tsc"
   },
-  "keywords": ["static blog", "blog cli", "blog generator", "md parse"],
+  "keywords": [
+    "static blog",
+    "blog cli",
+    "blog generator",
+    "md parse"
+  ],
   "license": "MIT",
   "dependencies": {
     "chalk": "4.0.0",
@@ -41,6 +46,7 @@
     "markdown-it-deflist": "^2.1.0",
     "markdown-it-emoji": "^2.0.0",
     "markdown-it-footnote": "^3.0.3",
+    "markdown-it-katex": "^2.0.3",
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",

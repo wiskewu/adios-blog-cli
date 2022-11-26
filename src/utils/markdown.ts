@@ -10,6 +10,7 @@ import MarkdownItFootnote from 'markdown-it-footnote';
 import MarkdownItDeflist from 'markdown-it-deflist';
 import MarkdownItMark from 'markdown-it-mark';
 import MarkdownItAnchor from 'markdown-it-anchor';
+import MarkdownItKatex from 'markdown-it-katex';
 import MarkdownItTocRightDone from 'markdown-it-toc-done-right';
 import MarkdownItTaskLists from 'markdown-it-task-lists';
 import MarkdownItEmoji from 'markdown-it-emoji';
@@ -68,6 +69,7 @@ md.use(MarkdownItSub)
     .use(MarkdownItFootnote)
     .use(MarkdownItDeflist)
     .use(MarkdownItMark)
+    .use(MarkdownItKatex, { throwOnError: true, errorColor: '#cc0000' })
     .use(MarkdownItTaskLists)
     .use(MarkdownItEmoji)
     .use(MarkdownItAnchor, { slugify: anchorSlugify })
