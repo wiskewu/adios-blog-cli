@@ -1,6 +1,6 @@
 {
   "name": "adios-blog-cli",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "adiós static blog, generator, cli",
   "main": "lib/index.js",
   "repository": {
