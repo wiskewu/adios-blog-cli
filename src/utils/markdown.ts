@@ -14,6 +14,7 @@ import MarkdownItKatex from 'markdown-it-katex';
 import MarkdownItTocRightDone from 'markdown-it-toc-done-right';
 import MarkdownItTaskLists from 'markdown-it-task-lists';
 import MarkdownItEmoji from 'markdown-it-emoji';
+import MarkdownItAttrs from 'markdown-it-attrs';
 import hljs, { Language } from 'highlight.js';
 import { parse } from 'node-html-parser';
 import slugify from 'slugify';
@@ -23,16 +24,29 @@ import { log, error, warn } from '../utils/logger';
 import { blogInfoValidate } from './checker';
 import { type MarkdownDescriptor } from '../interface';
 
+// see https://zhuanlan.zhihu.com/p/266732210
+const chinese_popular_7000 = /[一-龟]/;
+
 /**
  * 
- * @param str 不能包含中文
+ * @param str 可包含中文
  * @returns 转化锚链接字符串为符合语法的锚链接
  */
 const anchorSlugify = (str: string): string => {
-    return slugify(str, {
-        lower: true,
-        replacement: '-',
-    });
+    let res = '';
+    for (const char of str) {
+        // 提供对中文字符的支持
+        if (chinese_popular_7000.test(char)) {
+            res += char;
+        } else {
+            // 不支持转化中文字符
+            res += slugify(char, {
+                lower: true,
+                replacement: '-',
+            });
+        }
+    }
+    return res;
 };
 
 const md: MarkdownIt = new MarkdownIt({
@@ -72,26 +86,22 @@ md.use(MarkdownItSub)
     .use(MarkdownItKatex, { throwOnError: true, errorColor: '#cc0000' })
     .use(MarkdownItTaskLists)
     .use(MarkdownItEmoji)
-    .use(MarkdownItAnchor, { slugify: anchorSlugify })
-    .use(MarkdownItTocRightDone);
-
-// /**
-//  * 创建代码块
-//  * @param originCodeBlockHtml 
-//  * @param className 
-//  * @param language 
-//  * @returns 
-//  */
-//  const createCodeBlock = (originCodeBlockHtml: string, className: string, language?: string) => {
-//     const lang = language || 'Code';
-//     return `<figure class="hljs ${className}" data-lang="${lang}"><table><tbody>
-//                 <tr>
-//                     <td class="hljs-code">
-//                         ${originCodeBlockHtml}
-//                     </td>
-//                 </tr>
-//             </tbody></table></figure>`;
-// };
+    .use(MarkdownItAttrs)
+    .use(MarkdownItAnchor, {
+        // see https://github.com/valeriangalliat/markdown-it-anchor/blob/HEAD/README-zh_CN.md
+        slugify: anchorSlugify,
+        permalink: false,
+        uniqueSlugStartIndex: 1,
+    })
+    .use(MarkdownItTocRightDone, {
+        // see https://www.npmjs.com/package/markdown-it-toc-done-right#options
+        // containerId: "table-of-contents",
+        containerClass: "table-of-contents",
+        listType: "ol",
+        listClass: "toc-list",
+        itemClass: "toc-list-item",
+        linkClass: "toc-list-item-link",
+    });
 
 /**
  * 根据html生成对应的目录标记（弥补markdown-it-anchor 不解析纯html文本的问题）
@@ -101,19 +111,19 @@ md.use(MarkdownItSub)
  */
 const processingRawMdHtml = (html: string, parsedPublicPath: string): { html: string; toc: string } => {
     const root = parse(html);
-    const timeMs = Date.now();
-    let titleCnt = 1;
-    // 根据html的h元素生成对应的目录标记（弥补markdown-it-anchor 不解析纯html文本的问题）
-    for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
-        let href = h.getAttribute('id');
-        if (!href) {
-            const tid = String(titleCnt++).padStart(3, '0');
-            href = `${timeMs} ${tid}`;
-        }
-        const slug = anchorSlugify(href);
-        h.setAttribute('id', slug);
-        h.innerHTML = `<a class="header-anchor" href="#${slug}">#</a>${h.innerHTML}`;
-    }
+    // const prefix = 'anchor';
+    // let titleCnt = 1;
+    // // 根据html的h元素生成对应的目录标记（弥补markdown-it-anchor 不解析纯html文本的问题）
+    // for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+    //     let href = h.getAttribute('id');
+    //     if (!href) {
+    //         const tid = String(titleCnt++).padStart(3, '0');
+    //         href = `${prefix} ${tid}`;
+    //     }
+    //     const slug = anchorSlugify(href);
+    //     h.setAttribute('id', slug);
+    //     h.innerHTML = `<a class="header-anchor" href="#${slug}">¶</a>${h.innerHTML}`;
+    // }
 
     // 额外封装代码块
     // for (const c of root.querySelectorAll('pre')) {
