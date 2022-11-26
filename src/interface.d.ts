@@ -26,6 +26,8 @@ export interface SiteinfoConfig {
     keywords: string;
     homepage: string;
     publicPath: string;
+    // 建立于
+    createAt: string;
 }
 export interface NavListItem {
     title: string;

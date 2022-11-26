@@ -125,6 +125,14 @@ const processingRawMdHtml = (html: string, parsedPublicPath: string): { html: st
     //     h.innerHTML = `<a class="header-anchor" href="#${slug}">¶</a>${h.innerHTML}`;
     // }
 
+    // 锚链接修改
+    for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        let href = h.getAttribute('id');
+        if (href) {
+            h.innerHTML = `<a class="header-anchor" href="#${href}">¶</a>${h.innerHTML}`;
+        }
+    }
+
     // 额外封装代码块
     // for (const c of root.querySelectorAll('pre')) {
     //     const codeBlock = c.outerHTML; // 取出"<pre><code></code></pre>"部分
